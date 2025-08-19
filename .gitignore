@@ -1,0 +1,9 @@
+.DS_Store
+
+debug/
+target/
+
+*.pdb
+
+**/*.rs.bk
+.env
