@@ -1,4 +1,5 @@
 mod controller;
+mod service;
 
 use actix_web::web;
 

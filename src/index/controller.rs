@@ -1,6 +1,7 @@
-use actix_web::{get, Responder};
+use actix_web::{get, HttpResponse, Responder};
 
 #[get("/")]
 async fn index() -> impl Responder {
-  "Hello, World!"
+  let result = super::service::index().await;
+  HttpResponse::Ok().body(result)
 }
