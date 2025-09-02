@@ -1,105 +1,112 @@
-# test-rust-web-site
+# Rust Actix-web Starter
 
-這是一個使用 Rust 和 Actix-web 框架開發的簡單 Web 服務。
+A high-performance, container-ready web service template built with Rust and the Actix-web framework. This project serves as a robust starting point for developing fast and reliable web applications.
 
-## 專案描述
+## ✨ Features
 
-本專案提供一個基本的 HTTP 伺服器，它會在根路徑 (`/`) 回應 "Hello, World!"。專案結構包含了 Docker 設定，使其易於容器化部署，並包含效能測試的設定。
+- **Static File Serving**: Serves static assets from the `/assets` directory.
+- **Health Check**: Includes a `/healthchecker` endpoint for monitoring.
+- **Environment-based Configuration**: Easily configure the app using a `.env` file.
+- **Structured Logging**: Integrated `env_logger` for clear and filterable logs.
+- **Containerized**: Comes with a `Dockerfile` for easy containerization and deployment.
+- **Benchmarking Ready**: Includes a `benchmark` setup with `docker-compose` and `k6`.
 
-## 功能
+## 🛠️ Tech Stack
 
-- 一個 `/` 端點，回傳 "Hello, World!"
-- 使用 `.env` 檔案進行環境變數設定
-- 使用 `env_logger` 進行日誌紀錄
-- 提供 `Dockerfile` 以進行容器化
-- 提供 `docker-compose.yaml` 用於效能測試
+- **Backend**: [Rust](https://www.rust-lang.org/) with [Actix-web](https://actix.rs/)
+- **Web Server**: [Nginx](https://www.nginx.com/) (see `config/nginx.conf`)
+- **Containerization**: [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
 
-## 環境需求
+## 📋 Prerequisites
 
-- [Rust](https://www.rust-lang.org/tools/install)
-- [Docker](https://docs.docker.com/get-docker/) (選用，用於容器化)
-- [Docker Compose](https://docs.docker.com/compose/install/) (選用，用於效能測試)
+- [Rust Toolchain](https://www.rust-lang.org/tools/install)
+- [Docker](https://docs.docker.com/get-docker/) (for containerized workflows)
 
-## 如何開始
+## 🚀 Getting Started
 
-### 1. 複製專案
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd test_web_site
+    ```
 
-```bash
-git clone <repository-url>
-cd test_web_site
-```
+2.  **Configure the environment (optional):**
+    Create a `.env` file in the root directory by copying the example below. If not provided, the server defaults to `0.0.0.0:3000`.
+    ```env
+    # .env
+    HOST=127.0.0.1
+    PORT=8080
+    WORKER_NUM=4
+    ```
 
-### 2. (選用) 設定環境變數
+3.  **Run the development server:**
+    ```bash
+    cargo run
+    ```
+    The application will be available at `http://127.0.0.1:8080` (or your configured host and port).
 
-您可以建立一個 `.env` 檔案來設定 `HOST` 和 `PORT`。如果未設定，預設將使用 `0.0.0.0:3000`。
+## 🏗️ Building for Production
 
-```
-# .env
-HOST=127.0.0.1
-PORT=8080
-```
-
-### 3. 在本地端執行
-
-```bash
-cargo run
-```
-
-應用程式將會啟動在 `http://<HOST>:<PORT>`。
-
-## 測試
-
-執行 Rust 的標準測試指令：
-
-```bash
-cargo test
-```
-
-## 建置
-
-若要建置用於生產環境的執行檔：
-
+To create an optimized release build, run:
 ```bash
 cargo build --release
 ```
+The compiled binary will be located at `target/release/test_web_site`.
 
-執行檔將會位於 `./target/release/test_web_site`。
+## 🐳 Docker Usage
 
-## Docker
+You can build and run the application using Docker for a consistent and isolated environment.
 
-您也可以使用 Docker 來建置和執行此應用程式。
-
-### 1. 建置 Docker 映像
-
-```bash
-docker build -t test_web_site .
-```
-
-### 2. 執行 Docker 容器
-
-```bash
-docker run -p 3000:3000 -d test_web_site
-```
-
-應用程式將會在 `http://localhost:3000` 上提供服務。
-
-## 效能測試
-
-專案中包含了使用 `docker-compose` 的基本效能測試設定。
-
-1.  進入 `performance` 目錄：
+1.  **Build the Docker image:**
     ```bash
-    cd performance
+    docker build -t test-web-site .
     ```
-2.  啟動服務：
+
+2.  **Run the Docker container:**
+    ```bash
+    docker run -p 8080:3000 -d test-web-site
+    ```
+    The application will be accessible at `http://localhost:8080`.
+
+## ⚡ Benchmarking
+
+The project includes a simple benchmarking setup using k6.
+
+1.  **Navigate to the benchmark directory:**
+    ```bash
+    cd benchmark
+    ```
+2.  **Start the services:**
     ```bash
     docker-compose up -d
     ```
-3.  執行測試腳本 (假設您已經安裝了 k6)：
+3.  **Run the test script:**
+    (Requires [k6](https://k6.io/docs/getting-started/installation/) to be installed locally)
     ```bash
     k6 run run.js
     ```
-4.  完成後關閉服務：
+4.  **Shutdown the services:**
     ```bash
     docker-compose down
     ```
+
+## 📂 Project Structure
+
+```
+/
+├── assets/           # Static files (HTML, CSS, JS)
+├── benchmark/        # k6 and docker-compose for performance testing
+├── config/           # Nginx configuration
+├── src/              # Rust source code
+│   ├── health/       # /health endpoint module
+│   ├── index/        # / endpoint module
+│   └── main.rs       # Application entry point
+├── Cargo.toml        # Rust package definition and dependencies
+└── Dockerfile        # Container build instructions
+```
+
+## 🌐 Endpoints
+
+- `GET /api`: Serves the api endpoint.
+- `GET /assets/*`: Serves the main `index.html` from the `assets` directory.
+- `GET /healthchecker`: Returns a `200 OK` status for health checks.
