@@ -1,5 +1,5 @@
 mod health;
-mod index;
+mod api;
 
 use std::{env, u16};
 use actix_web::{App, HttpServer, middleware::Logger};
@@ -42,7 +42,7 @@ async fn main() -> std::io::Result<()> {
       .use_last_modified(true)
     )
     .service(health::init())
-    .service(index::init())
+    .service(api::init())
   })
   .workers(worker)
   .bind((host, port))?

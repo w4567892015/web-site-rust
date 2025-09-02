@@ -1,11 +1,10 @@
-use actix_web::{web, get, HttpResponse, Responder};
+mod controller;
+
+use actix_web::web;
 
 pub fn init() -> actix_web::Scope {
   web::scope("/healthchecker")
-    .service(health_checker_handler)
+    .service(controller::health_checker_handler)
 }
 
-#[get("")]
-async fn health_checker_handler() -> impl Responder {
-  HttpResponse::Ok()
-}
+
