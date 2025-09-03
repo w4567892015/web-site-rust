@@ -1,12 +1,16 @@
+mod logger;
 mod health;
 mod api;
 
 use std::{env, u16};
-use actix_web::{App, HttpServer, middleware::Logger};
+
+use tracing::instrument;
+use tracing_actix_web::TracingLogger;
+use actix_web::{App, HttpServer, middleware::Compat};
 use actix_cors::Cors;
 use actix_files::Files;
 
-
+#[instrument]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
   dotenvy::dotenv().ok();
@@ -24,7 +28,7 @@ async fn main() -> std::io::Result<()> {
     .parse::<u16>()
     .expect("PORT must be a valid u16 number");
 
-  env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+  let provider = logger::init();
 
   println!("🚀 Server ready at http://{}:{} worker: {}", host, port, worker);
 
@@ -35,17 +39,24 @@ async fn main() -> std::io::Result<()> {
       .allow_any_method()
       .supports_credentials();
     App::new()
-    .wrap(Logger::default())
-    .service(Files::new("/assets", "./assets")
-      .index_file("index.html")
-      .use_etag(true)
-      .use_last_modified(true)
-    )
-    .service(health::init())
-    .service(api::init())
+      .wrap(Compat::new(TracingLogger::default()))
+      .service(Files::new("/assets", "./assets")
+        .index_file("index.html")
+        .use_etag(true)
+        .use_last_modified(true)
+      )
+      .service(health::init())
+      .service(api::init())
   })
   .workers(worker)
   .bind((host, port))?
   .run()
-  .await
+  .await?;
+
+   // Ensure all spans have been shipped to Jaeger.
+  provider
+    .shutdown()
+    .expect("Failed to close tracer provider");
+
+  Ok(())
 }
