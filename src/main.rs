@@ -1,4 +1,4 @@
-mod logger;
+mod otel;
 mod health;
 mod api;
 
@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
     .parse::<u16>()
     .expect("PORT must be a valid u16 number");
 
-  let provider = logger::init();
+  otel::init();
 
   println!("🚀 Server ready at http://{}:{} worker: {}", host, port, worker);
 
@@ -51,12 +51,5 @@ async fn main() -> std::io::Result<()> {
   .workers(worker)
   .bind((host, port))?
   .run()
-  .await?;
-
-   // Ensure all spans have been shipped to Jaeger.
-  provider
-    .shutdown()
-    .expect("Failed to close tracer provider");
-
-  Ok(())
+  .await
 }
