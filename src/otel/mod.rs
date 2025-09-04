@@ -11,11 +11,13 @@ use tracing_subscriber::{fmt, EnvFilter, Registry, prelude::*};
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_opentelemetry::OpenTelemetryLayer;
 
-use opentelemetry::{KeyValue};
+use opentelemetry::KeyValue;
 use opentelemetry::trace::TracerProvider;
 use opentelemetry_semantic_conventions::resource;
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
-use opentelemetry_sdk::{Resource};
+use opentelemetry_sdk::Resource;
+
+use opentelemetry_sdk::{logs::SdkLoggerProvider, trace::SdkTracerProvider, metrics::SdkMeterProvider};
 
 fn get_service_name() -> String {
   env::var("APP_NAME")
@@ -39,7 +41,21 @@ fn get_resource() -> Resource {
     .clone()
 }
 
-pub fn init() {
+pub struct Providers {
+  logger_provider: SdkLoggerProvider,
+  tracer_provider: SdkTracerProvider,
+  meter_provider: SdkMeterProvider,
+}
+
+impl Providers {
+  pub fn showdown(self) {
+    let _ = self.logger_provider.shutdown();
+    let _ = self.tracer_provider.shutdown();
+    let _ = self.meter_provider.shutdown();
+  }
+}
+
+pub fn init() -> Providers {
   let env_filter = EnvFilter::try_from_default_env()
     .or_else(|_| EnvFilter::try_new("info"))
     .unwrap();
@@ -64,7 +80,7 @@ pub fn init() {
   let tracer_provider = traces::init_traces();
   let tracer_layer = tracer_provider.tracer(get_service_name());
 
-  let _meter_provider = metrics::init_metrics();
+  let meter_provider = metrics::init_metrics();
 
   let subscriber = Registry::default()
     .with(env_filter)
@@ -77,4 +93,6 @@ pub fn init() {
 
   LogTracer::init().expect("Failed to set logger");
   set_global_default(subscriber).expect("Failed to set subscriber");
+
+  Providers { logger_provider, tracer_provider, meter_provider }
 }

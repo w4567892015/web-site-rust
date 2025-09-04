@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
     .parse::<u16>()
     .expect("PORT must be a valid u16 number");
 
-  otel::init();
+  let providers = otel::init();
 
   println!("🚀 Server ready at http://{}:{} worker: {}", host, port, worker);
 
@@ -51,5 +51,9 @@ async fn main() -> std::io::Result<()> {
   .workers(worker)
   .bind((host, port))?
   .run()
-  .await
+  .await?;
+
+  providers.showdown();
+
+  Ok(())
 }
