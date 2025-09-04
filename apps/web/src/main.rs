@@ -1,4 +1,4 @@
-mod otel;
+use otel;
 mod health;
 mod api;
 

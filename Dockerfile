@@ -3,7 +3,7 @@ ARG BUSYBOX_VERSION=1.31.0-i686-uclibc
 
 
 FROM alpine AS builder
-ARG appName="test_web_site"
+ARG appName=""
 COPY ./target/release/${appName} /
 RUN mv /${appName} /app
 

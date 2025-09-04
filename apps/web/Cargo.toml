@@ -1,0 +1,18 @@
+[package]
+name = "web"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+readme.workspace = true
+
+[dependencies]
+actix-cors = "0.7.1"
+actix-files = "0.6.7"
+actix-web = "4.11.0"
+dotenvy = "0.15.7"
+env_logger = "0.11.8"
+tracing = "0.1.41"
+tracing-actix-web = "0.7.19"
+otel = { workspace = true }
