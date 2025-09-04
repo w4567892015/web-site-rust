@@ -13,6 +13,6 @@ pub fn init_metrics() -> SdkMeterProvider {
 
   SdkMeterProvider::builder()
     .with_periodic_exporter(exporter)
-    .with_resource(super::get_resource())
+    .with_resource(super::RESOURCE.clone())
     .build()
 }

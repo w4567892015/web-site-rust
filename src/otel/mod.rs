@@ -3,7 +3,7 @@ mod traces;
 mod metrics;
 
 use std::env;
-use std::sync::OnceLock;
+use std::sync::LazyLock;
 
 use tracing::{subscriber::set_global_default};
 use tracing_log::LogTracer;
@@ -29,17 +29,12 @@ fn get_endpoint() -> String {
     .unwrap_or("http://localhost:4317".to_string())
 }
 
-fn get_resource() -> Resource {
-  static RESOURCE: OnceLock<Resource> = OnceLock::new();
-  RESOURCE
-    .get_or_init(|| {
-      Resource::builder()
-        .with_attribute(KeyValue::new(resource::SERVICE_NAME, get_service_name()))
-        .with_attribute(KeyValue::new(resource::SERVICE_VERSION, "0.1.0".to_string()))
-        .build()
-    })
-    .clone()
-}
+static RESOURCE: LazyLock<Resource> = LazyLock::new(|| {
+  Resource::builder()
+    .with_attribute(KeyValue::new(resource::SERVICE_NAME, get_service_name()))
+    .with_attribute(KeyValue::new(resource::SERVICE_VERSION, "0.1.0".to_string()))
+    .build()
+});
 
 pub struct Providers {
   logger_provider: SdkLoggerProvider,

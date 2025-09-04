@@ -17,6 +17,6 @@ pub fn init_traces() -> SdkTracerProvider {
 
   SdkTracerProvider::builder()
     .with_batch_exporter(exporter)
-    .with_resource(super::get_resource())
+    .with_resource(super::RESOURCE.clone())
     .build()
 }
