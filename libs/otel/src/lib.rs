@@ -84,7 +84,8 @@ pub fn init() -> Providers {
     .with(OpenTelemetryLayer::new(tracer_layer))
     .with(JsonStorageLayer)
     .with(BunyanFormattingLayer::new(get_service_name(), std::io::stdout))
-    .with(fmt::layer().pretty());
+    .with(fmt::layer()
+    .pretty());
 
   LogTracer::init().expect("Failed to set logger");
   set_global_default(subscriber).expect("Failed to set subscriber");

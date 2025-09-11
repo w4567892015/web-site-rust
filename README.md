@@ -1,112 +1,74 @@
-# Rust Actix-web Starter
+# Test Project (Rust)
 
-A high-performance, container-ready web service template built with Rust and the Actix-web framework. This project serves as a robust starting point for developing fast and reliable web applications.
+這是一個使用 Rust 建立的 Monorepo 專案，包含一個高效能的 Web 應用程式和共用函式庫。
 
-## ✨ Features
+## 📋 先決條件 (Prerequisites)
 
-- **Static File Serving**: Serves static assets from the `/assets` directory.
-- **Health Check**: Includes a `/healthchecker` endpoint for monitoring.
-- **Environment-based Configuration**: Easily configure the app using a `.env` file.
-- **Structured Logging**: Integrated `env_logger` for clear and filterable logs.
-- **Containerized**: Comes with a `Dockerfile` for easy containerization and deployment.
-- **Benchmarking Ready**: Includes a `benchmark` setup with `docker-compose` and `k6`.
-
-## 🛠️ Tech Stack
-
-- **Backend**: [Rust](https://www.rust-lang.org/) with [Actix-web](https://actix.rs/)
-- **Web Server**: [Nginx](https://www.nginx.com/) (see `config/nginx.conf`)
-- **Containerization**: [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
-
-## 📋 Prerequisites
+在開始之前，請確保您已安裝以下工具：
 
 - [Rust Toolchain](https://www.rust-lang.org/tools/install)
-- [Docker](https://docs.docker.com/get-docker/) (for containerized workflows)
+- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/)
+- [Make](https://www.gnu.org/software/make/)
+- [Bunyan](https://www.npmjs.com/package/bunyan) (用於美化日誌輸出 `npm install -g bunyan`)
 
-## 🚀 Getting Started
+## 📂 工作區結構 (Workspace Structure)
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd test_web_site
-    ```
-
-2.  **Configure the environment (optional):**
-    Create a `.env` file in the root directory by copying the example below. If not provided, the server defaults to `0.0.0.0:3000`.
-    ```env
-    # .env
-    HOST=127.0.0.1
-    PORT=8080
-    WORKER_NUM=4
-    ```
-
-3.  **Run the development server:**
-    ```bash
-    cargo run
-    ```
-    The application will be available at `http://127.0.0.1:8080` (or your configured host and port).
-
-## 🏗️ Building for Production
-
-To create an optimized release build, run:
-```bash
-cargo build --release
-```
-The compiled binary will be located at `target/release/test_web_site`.
-
-## 🐳 Docker Usage
-
-You can build and run the application using Docker for a consistent and isolated environment.
-
-1.  **Build the Docker image:**
-    ```bash
-    docker build -t test-web-site .
-    ```
-
-2.  **Run the Docker container:**
-    ```bash
-    docker run -p 8080:3000 -d test-web-site
-    ```
-    The application will be accessible at `http://localhost:8080`.
-
-## ⚡ Benchmarking
-
-The project includes a simple benchmarking setup using k6.
-
-1.  **Navigate to the benchmark directory:**
-    ```bash
-    cd benchmark
-    ```
-2.  **Start the services:**
-    ```bash
-    docker-compose up -d
-    ```
-3.  **Run the test script:**
-    (Requires [k6](https://k6.io/docs/getting-started/installation/) to be installed locally)
-    ```bash
-    k6 run run.js
-    ```
-4.  **Shutdown the services:**
-    ```bash
-    docker-compose down
-    ```
-
-## 📂 Project Structure
+本專案採用工作區架構，將不同的功能模組化：
 
 ```
 /
-├── assets/           # Static files (HTML, CSS, JS)
-├── benchmark/        # k6 and docker-compose for performance testing
-├── config/           # Nginx configuration
-├── src/              # Rust source code
-│   ├── health/       # /health endpoint module
-│   ├── index/        # / endpoint module
-│   └── main.rs       # Application entry point
-├── Cargo.toml        # Rust package definition and dependencies
-└── Dockerfile        # Container build instructions
+├── apps/
+│   └── web/          # Actix-web 網頁應用程式
+├── libs/
+│   └── otel/         # OpenTelemetry 共用函式庫
+├── Makefile          # 專案指令
+└── Cargo.toml        # 工作區設定
 ```
 
-## 🌐 Endpoints
+- **`apps/web`**: 一個使用 Actix-web 框架建置的高效能 Web 服務，已整合日誌、環境變數設定並包含容器化支援。
+- **`libs/otel`**: 一個共用的函式庫，用於處理 OpenTelemetry (Tracing, Metrics, Logs) 的初始化與設定。
 
-- `GET /api`: Serves the api endpoint.
-- `GET /assets/*`: Serves the main `index.html` from the `assets` directory.
-- `GET /healthchecker`: Returns a `200 OK` status for health checks.
+## 🚀 快速開始 (Getting Started)
+
+1.  **啟動專案所需資源:**
+    ```bash
+    cd test_web_site/apps/web
+    docker compose up
+    ```
+
+2.  **啟動開發伺服器:**
+    使用 `make` 指令來啟動 `web` 應用程式的開發伺服器。它會自動監聽檔案變更並重新載入。
+    ```bash
+    make start.dev name=web
+    ```
+    應用程式將會在本機的 `http://127.0.0.1:8080` 上執行 (預設)。
+
+## 🛠️ 主要指令 (Makefile Commands)
+
+我們提供了一個 `Makefile` 來簡化常見的開發任務。
+
+- `make start.dev name=<app_name>`
+  啟動指定的應用程式，並在檔案變更時自動重載。
+  ```bash
+  # 範例
+  make start.dev name=web
+  ```
+
+- `make release name=<app_name>`
+  為指定的應用程式建立一個最佳化的產品級建置 (release build)。
+  ```bash
+  # 範例
+  make release name=web
+  ```
+
+- `make test`
+  執行工作區中所有的測試。
+
+- `make new.app name=<app_name>`
+  在 `apps` 目錄下建立一個新的應用程式模板。
+
+- `make new.lib name=<lib_name>`
+  在 `libs` 目錄下建立一個新的函式庫模板。
+
+- `make clean`
+  清除所有建置產物。
