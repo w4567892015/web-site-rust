@@ -57,7 +57,7 @@ async fn main() -> std::io::Result<()> {
   .run()
   .await?;
 
-  providers.showdown();
+  providers.expect("OTEL Provider Not Found!").showdown();
 
   Ok(())
 }

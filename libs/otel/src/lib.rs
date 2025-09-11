@@ -19,6 +19,27 @@ use opentelemetry_sdk::Resource;
 
 use opentelemetry_sdk::{logs::SdkLoggerProvider, trace::SdkTracerProvider, metrics::SdkMeterProvider};
 
+fn get_enable_otel_logger() -> bool {
+  env::var("ENABLE_OTEL_LOGGER")
+    .unwrap_or("false".to_string())
+    .parse::<bool>()
+    .expect("ENABLE_OTEL_LOGGER must be a valid boolean")
+}
+
+fn get_enable_otel_tracer() -> bool {
+  env::var("ENABLE_OTEL_TRACER")
+    .unwrap_or("false".to_string())
+    .parse::<bool>()
+    .expect("ENABLE_OTEL_TRACER must be a valid boolean")
+}
+
+fn get_enable_otel_meter() -> bool {
+  env::var("ENABLE_OTEL_METER")
+    .unwrap_or("false".to_string())
+    .parse::<bool>()
+    .expect("ENABLE_OTEL_METER must be a valid boolean")
+}
+
 fn get_service_name() -> String {
   env::var("APP_NAME")
     .unwrap_or("undefined".to_string())
@@ -39,18 +60,20 @@ static RESOURCE: LazyLock<Resource> = LazyLock::new(|| {
 pub struct Providers {
   logger_provider: SdkLoggerProvider,
   tracer_provider: SdkTracerProvider,
-  meter_provider: SdkMeterProvider,
+  meter_provider: Option<SdkMeterProvider>,
 }
 
 impl Providers {
   pub fn showdown(self) {
     let _ = self.logger_provider.shutdown();
     let _ = self.tracer_provider.shutdown();
-    let _ = self.meter_provider.shutdown();
+    if self.meter_provider.is_some() {
+      let _ = self.meter_provider.expect("REASON").shutdown();
+    }
   }
 }
 
-pub fn init() -> Providers {
+pub fn init() -> Option<Providers> {
   let env_filter = EnvFilter::try_from_default_env()
     .or_else(|_| EnvFilter::try_new("info"))
     .unwrap();
@@ -75,13 +98,24 @@ pub fn init() -> Providers {
   let tracer_provider = traces::init_traces();
   let tracer_layer = tracer_provider.tracer(get_service_name());
 
-  let meter_provider = metrics::init_metrics();
+  let mut meter_provider = None;
+  if get_enable_otel_meter() {
+    meter_provider = metrics::init_metrics();
+  }
 
   let subscriber = Registry::default()
     .with(env_filter)
     .with(fmt_layer)
-    .with(logger_layer)
-    .with(OpenTelemetryLayer::new(tracer_layer))
+    .with(if get_enable_otel_logger() {
+      Some(logger_layer)
+    } else {
+      None
+    })
+    .with( if get_enable_otel_tracer() {
+      Some(OpenTelemetryLayer::new(tracer_layer))
+    } else {
+      None
+    })
     .with(JsonStorageLayer)
     .with(BunyanFormattingLayer::new(get_service_name(), std::io::stdout))
     .with(fmt::layer()
@@ -90,5 +124,5 @@ pub fn init() -> Providers {
   LogTracer::init().expect("Failed to set logger");
   set_global_default(subscriber).expect("Failed to set subscriber");
 
-  Providers { logger_provider, tracer_provider, meter_provider }
+  Some(Providers { logger_provider, tracer_provider, meter_provider })
 }

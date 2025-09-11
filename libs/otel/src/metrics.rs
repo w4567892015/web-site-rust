@@ -3,7 +3,7 @@ use std::time::Duration;
 use opentelemetry_sdk::metrics::SdkMeterProvider;
 use opentelemetry_otlp::{WithExportConfig, MetricExporter};
 
-pub fn init_metrics() -> SdkMeterProvider {
+pub fn init_metrics() -> Option<SdkMeterProvider> {
   let exporter = MetricExporter::builder()
     .with_tonic()
     .with_endpoint(super::get_endpoint())
@@ -11,8 +11,8 @@ pub fn init_metrics() -> SdkMeterProvider {
     .build()
     .expect("Failed to create metric exporter");
 
-  SdkMeterProvider::builder()
+  Some(SdkMeterProvider::builder()
     .with_periodic_exporter(exporter)
     .with_resource(super::RESOURCE.clone())
-    .build()
+    .build())
 }
