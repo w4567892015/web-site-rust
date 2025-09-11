@@ -13,6 +13,10 @@ use actix_files::Files;
 #[instrument]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+  let assets_dir = env::current_exe()?
+    .ancestors().nth(1).unwrap().to_path_buf()
+    .join("assets");
+
   dotenvy::dotenv().ok();
 
   let worker = env::var("WORKER_NUM")
@@ -40,7 +44,7 @@ async fn main() -> std::io::Result<()> {
       .supports_credentials();
     App::new()
       .wrap(Compat::new(TracingLogger::default()))
-      .service(Files::new("/assets", "./assets")
+      .service(Files::new("/assets", assets_dir.as_path())
         .index_file("index.html")
         .use_etag(true)
         .use_last_modified(true)

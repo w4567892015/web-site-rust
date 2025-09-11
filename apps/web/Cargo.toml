@@ -6,6 +6,7 @@ authors.workspace = true
 description.workspace = true
 license.workspace = true
 readme.workspace = true
+build = "build.rs"
 
 [dependencies]
 actix-cors = "0.7.1"
