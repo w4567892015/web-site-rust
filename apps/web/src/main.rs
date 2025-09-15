@@ -6,7 +6,7 @@ use std::{env, u16};
 
 use tracing::instrument;
 use tracing_actix_web::TracingLogger;
-use actix_web::{App, HttpServer, middleware::Compat};
+use actix_web::{App, HttpServer};
 use actix_cors::Cors;
 use actix_files::Files;
 
@@ -43,7 +43,7 @@ async fn main() -> std::io::Result<()> {
       .allow_any_method()
       .supports_credentials();
     App::new()
-      .wrap(Compat::new(TracingLogger::default()))
+      .wrap(TracingLogger::default())
       .service(Files::new("/assets", assets_dir.as_path())
         .index_file("index.html")
         .use_etag(true)
