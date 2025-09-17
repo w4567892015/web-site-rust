@@ -12,7 +12,7 @@ pub fn init_logs() -> SdkLoggerProvider {
     .expect("Failed to create log exporter");
 
   SdkLoggerProvider::builder()
-    .with_resource(super::RESOURCE.clone())
     .with_batch_exporter(exporter)
+    .with_resource(super::RESOURCE.clone())
     .build()
 }
