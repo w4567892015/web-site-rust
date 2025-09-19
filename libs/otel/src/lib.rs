@@ -41,7 +41,7 @@ fn get_enable_otel_meter() -> bool {
 }
 
 fn get_service_name() -> String {
-  env::var("APP_NAME")
+  env::var("SERVICE_NAME")
     .unwrap_or("undefined".to_string())
 }
 
@@ -85,7 +85,7 @@ pub fn init() -> Option<Providers> {
     .with_ansi(true)
     .compact();
 
-  let logger_filter = EnvFilter::new("info")
+  let logger_filter = EnvFilter::new("INFO")
     .add_directive("hyper=off".parse().unwrap())
     .add_directive("opentelemetry=off".parse().unwrap())
     .add_directive("tonic=off".parse().unwrap())
@@ -118,8 +118,7 @@ pub fn init() -> Option<Providers> {
     })
     .with(JsonStorageLayer)
     .with(BunyanFormattingLayer::new(get_service_name(), std::io::stdout))
-    .with(fmt::layer()
-    .pretty());
+    .with(fmt::layer());
 
   LogTracer::init().expect("Failed to set logger");
   set_global_default(subscriber).expect("Failed to set subscriber");

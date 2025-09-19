@@ -18,8 +18,8 @@ exporters:
     endpoint: "http://loki:3100/otlp"
     tls:
       insecure: true
-  otlp/jaeger:
-    endpoint: jaeger:4317
+  otlp/tempo:
+    endpoint: tempo:4317
     tls:
       insecure: true
   prometheus:
@@ -29,12 +29,12 @@ exporters:
 
 service:
   pipelines:
-    # traces:
-    #   receivers: [otlp]
-    #   exporters: [otlp/jaeger]
-    # metrics:
-    #   receivers: [otlp]
-    #   exporters: [prometheus]
+    traces:
+      receivers: [otlp]
+      exporters: [otlp/tempo]
+    metrics:
+      receivers: [otlp]
+      exporters: [prometheus]
     logs:
       receivers: [otlp]
       exporters: [debug]
