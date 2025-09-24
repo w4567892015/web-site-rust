@@ -23,7 +23,8 @@ new.lib:
 	cargo new "${LIB_DIR}/${NAME}" --lib --vcs none
 
 start.dev:
-	cargo watch -x run -p ${NAME} | bunyan
+	cargo watch -x run -p ${NAME}
+# 	| bunyan
 
 clean:
 	cargo clean
